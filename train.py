@@ -10,6 +10,8 @@ import logging
 import numpy as np
 import utils
 
+from sklearn import ensemble
+from sklearn import linear_model
 from sklearn import metrics
 from sklearn import model_selection
 from sklearn import pipeline
@@ -19,24 +21,28 @@ from sklearn import svm
 _logger = logging.getLogger(__name__)
 
 _search_parameters = {
-    "rbf": {
+    "svm": {
         "clf__kernel": ["rbf"],
         "clf__C": [2, 4, 8, 10],
         "clf__gamma": ["scale", "auto"],
     },
-    "sigmoid": {
-        "clf__kernel": ["sigmoid"],
-        "clf__C": [0.1, 1, 10, 100],
-        "clf__gamma": ["scale", "auto"],
+    "forest": {
+        "clf__n_estimators": [50, 100, 500],
+        "clf__max_depth": [4, 16, 64],
+        "clf__n_jobs": [-1]
     },
-    "poly": {
-        "clf__kernel": ["poly"],
-        "clf__C": [0.1, 1, 10, 100],
-        "clf__gamma": ["scale", "auto"],
-        "clf__degree": [2, 3, 5]
+    "extra": {
+        "clf__n_estimators": [50, 100, 500],
+        "clf__max_depth": [4, 16, 64],
+        "clf__n_jobs": [-1]
+    },
+    "sgd": {
+        "clf__loss": ["hinge", "log"],
+        "clf__penalty": ["l1", "l2"],
+        "clf__alpha": [1e-4, 1e-2, 1e-1],
+        "clf__n_jobs": [-1]
     },
 }
-
 
 def load(filepath):
     """
@@ -59,7 +65,7 @@ def load(filepath):
         )
 
 
-def grid_search(X, y, kernel="rbf"):
+def grid_search(X, y, alg="svm"):
     """
     Perform a grid search on a small validation set and returns
     the best model.
@@ -68,17 +74,17 @@ def grid_search(X, y, kernel="rbf"):
 
     X       The features of the validation set
     y       The labels of the validation set
-    kernel  The SVM kernel to be used.
+    alg     The algorithm used to train the model
     """
 
     _logger.info("Performing grid search.")
     with utils.Timer() as t:
-        model = _make_pipeline(kernel)
+        model = _make_pipeline(alg)
 
         f1_scorer = metrics.make_scorer(metrics.f1_score, greater_is_better=True, average='micro')
         search = model_selection.GridSearchCV(
             model,
-            _search_parameters[kernel],
+            _search_parameters[alg],
             verbose=1,
             scoring=f1_scorer,
         )
@@ -107,10 +113,19 @@ def train(model, X, y):
     _logger.info("Training time: {:.2f}s".format(t.elapsed))
 
 
-def _make_pipeline(kernel="rbf", **kwargs):
+def _make_pipeline(model="svm", **kwargs):
+    if model == "svm":
+        clazz = svm.SVC
+    elif model == "forest":
+        clazz = ensemble.RandomForestClassifier
+    elif model == "extra":
+        clazz = ensemble.ExtraTreesClassifier
+    elif model == "sgd":
+        clazz = linear_model.SGDClassifier
+
     return pipeline.Pipeline([
         ("scaler", preprocessing.StandardScaler()),
-        ("clf", svm.SVC(kernel=kernel, **kwargs))
+        ("clf", clazz(**kwargs))
     ])
 
 
@@ -132,6 +147,31 @@ def _show_metrics(model, X_test, y_test):
         confusion = confusion
     )
 
+
+def _get_model_args(args):
+    if args.model == "svm":
+        try:
+            gamma = float(args.gamma)
+        except (TypeError, ValueError):
+            gamma = args.gamma
+
+        return {
+            "C": args.regularization,
+            "gamma": gamma
+        }
+    elif model in ["forest", "extra"]:
+        return {
+            "n_estimators": args.estimators,
+            "max_depth": args.max_depth,
+            "n_jobs": -1
+        }
+    elif model == "sgd":
+        return {
+            "loss": args.loss,
+            "penalty": args.penalty,
+            "alpha": args.alpha,
+            "n_jobs": -1
+        }
 
 def _make_argparser() -> argparse.ArgumentParser:
     """Construct the parser for the CLI arguments."""
@@ -173,11 +213,18 @@ def _make_argparser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "-V",
+        "--validation",
+        action="store_true",
+        help="Use the validation set to compute the metrics."
+    )
+
+    parser.add_argument(
         "-C",
         "--regularization",
         type=int,
         default=8,
-        help="Regularization parameter. "
+        help="Regularization parameter for SVM classifiers. "
             "The strength of the regularization is inversely proportional to C. "
             "Must be strictly positive. The penalty is a squared l2 penalty"
     )
@@ -185,16 +232,61 @@ def _make_argparser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-G",
         "--gamma",
-        default="scale",
+        default="auto",
         help="Kernel coefficient for 'rbf', 'poly' and 'sigmoid'. "
             "Can be a float value or one of 'scale' and 'auto'"
     )
 
     parser.add_argument(
-        "-k",
-        "--kernel",
-        default="rbf",
-        help="The SVM kernel to be used. "
+        "-E",
+        "--estimators",
+        type=int,
+        default=500,
+        help="Number of estimators used for ensemble classifiers. "
+             "Can be used with Random Forest or Extra Trees classifiers."
+    )
+
+    parser.add_argument(
+        "-D",
+        "--max_depth",
+        type=int,
+        default=16,
+        help="Max depth of tree classifiers. "
+             "Can be used with Random Forest or Extra Trees classifiers."
+    )
+
+    parser.add_argument(
+        "-L",
+        "--loss",
+        default="hinge",
+        help="The loss function to be used for SGD classifiers. "
+             "Can be 'hinge', 'log', 'modified_huber', 'squared_hinge', "
+             "'perceptron', or a regression loss: 'squared_error', 'huber', "
+             "'epsilon_insensitive', or 'squared_epsilon_insensitive'."
+    )
+
+    parser.add_argument(
+        "-P",
+        "--penalty",
+        default="l2",
+        help="The penalty (aka regularization term) to be used for SGD classifiers. "
+             "Can be either 'l1' or 'l2'."
+    )
+
+    parser.add_argument(
+        "-A",
+        "--alpha",
+        type=float,
+        default=1E-4,
+        help="Constant that multiplies the regularization term for SGD classifiers. "
+             "The higher the value, the stronger the regularization."
+    )
+
+    parser.add_argument(
+        "-M",
+        "--model",
+        default="svm",
+        help="The algorithm to be used for training the model. "
              "The following values are allowed: %s." % ", ".join(_search_parameters.keys())
     )
 
@@ -212,22 +304,17 @@ if __name__ == "__main__":
     X_train, y_train, X_val, y_val, X_test, y_test = load(args.dataset)
 
     if args.gridsearch:
-        model = grid_search(X_val, y_val, kernel=args.kernel)
+        model = grid_search(X_val, y_val, alg=args.model)
     else:
-        try:
-            gamma = float(args.gamma)
-        except (TypeError, ValueError):
-            gamma = args.gamma
+        model = _make_pipeline(_get_model_args(args))
 
-        model = _make_pipeline(
-            kernel=args.kernel,
-            C=args.regularization,
-            gamma=gamma)
-
-    _logger.info("Training an SVM classifier with %s kernel", args.kernel)
+    _logger.info("Training an %s classifier.", args.model)
     train(model, X_train, y_train)
 
     joblib.dump(model, args.outpath)
 
     if args.metrics:
-        _logger.info(_show_metrics(model, X_test, y_test))
+        if args.validation:
+            _logger.info(_show_metrics(model, X_val, y_val))
+        else:
+            _logger.info(_show_metrics(model, X_test, y_test))
