@@ -27,12 +27,12 @@ _search_parameters = {
         "clf__gamma": ["scale", "auto"],
     },
     "forest": {
-        "clf__n_estimators": [50, 100, 500],
+        "clf__n_estimators": [50, 100],
         "clf__max_depth": [4, 16, 64],
         "clf__n_jobs": [-1]
     },
     "extra": {
-        "clf__n_estimators": [50, 100, 500],
+        "clf__n_estimators": [50, 100],
         "clf__max_depth": [4, 16, 64],
         "clf__n_jobs": [-1]
     },
@@ -42,6 +42,34 @@ _search_parameters = {
         "clf__alpha": [1e-4, 1e-2, 1e-1],
         "clf__n_jobs": [-1]
     },
+    "voting": {
+        "clf__voting": ["hard", "soft"],
+        "clf__n_jobs": [-1]
+    }
+}
+
+_default_parameters = {
+    "svm": {
+        "kernel": "rbf",
+        "C": 8,
+        "gamma": "auto",
+    },
+    "forest": {
+        # "n_estimators": 500,
+        "max_depth": 16,
+        "n_jobs": -1
+    },
+    "extra": {
+        # "n_estimators": 500,
+        "max_depth": 16,
+        "n_jobs": -1
+    },
+    "sgd": {
+        "loss": "hinge",
+        "penalty": "l2",
+        "alpha": 1e-4,
+        "n_jobs": -1
+    }
 }
 
 def load(filepath):
@@ -115,19 +143,27 @@ def train(model, X, y):
 
 def _make_pipeline(model="svm", **kwargs):
     if model == "svm":
-        clazz = svm.SVC
+        clf = svm.SVC(**kwargs)
     elif model == "forest":
-        clazz = ensemble.RandomForestClassifier
+        clf = ensemble.RandomForestClassifier(**kwargs)
     elif model == "extra":
-        clazz = ensemble.ExtraTreesClassifier
+        clf = ensemble.ExtraTreesClassifier(**kwargs)
     elif model == "sgd":
-        clazz = linear_model.SGDClassifier
+        clf = linear_model.SGDClassifier(**kwargs)
+    elif model == "voting":
+        clf = ensemble.VotingClassifier(
+            [("rnd", ensemble.RandomForestClassifier(**_default_parameters["forest"])),
+             ("extra", ensemble.ExtraTreesClassifier(**_default_parameters["extra"])),
+             ("svm", svm.SVC(probability=True, **_default_parameters["svm"])),
+            #  ("sgd", linear_model.SGDClassifier(**_default_parameters["sgd"]))
+             ],
+            **kwargs
+        )
 
     return pipeline.Pipeline([
         ("scaler", preprocessing.StandardScaler()),
-        ("clf", clazz(**kwargs))
+        ("clf", clf)
     ])
-
 
 def _show_metrics(model, X_test, y_test):
     """
@@ -159,18 +195,22 @@ def _get_model_args(args):
             "C": args.regularization,
             "gamma": gamma
         }
-    elif model in ["forest", "extra"]:
+    elif args.model in ["forest", "extra"]:
         return {
             "n_estimators": args.estimators,
             "max_depth": args.max_depth,
             "n_jobs": -1
         }
-    elif model == "sgd":
+    elif args.model == "sgd":
         return {
             "loss": args.loss,
             "penalty": args.penalty,
             "alpha": args.alpha,
             "n_jobs": -1
+        }
+    elif args.model == "voting":
+        return {
+            "voting": "hard"
         }
 
 def _make_argparser() -> argparse.ArgumentParser:
@@ -306,7 +346,7 @@ if __name__ == "__main__":
     if args.gridsearch:
         model = grid_search(X_val, y_val, alg=args.model)
     else:
-        model = _make_pipeline(_get_model_args(args))
+        model = _make_pipeline(model= args.model, **_get_model_args(args))
 
     _logger.info("Training an %s classifier.", args.model)
     train(model, X_train, y_train)

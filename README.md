@@ -156,90 +156,191 @@ You can use the following models from the CLI:
     $ python3 -m train -v -m -V -g -M forest
     INFO    Loading dataset from data.h5
     INFO    Performing grid search.
-    Fitting 5 folds for each of 9 candidates, totalling 45 fits
-    INFO    Search time: 138.69s
-    INFO    Search Accuracy: 0.9473999999999998
+    Fitting 5 folds for each of 6 candidates, totalling 30 fits
+    INFO    Search time: 42.32s
+    INFO    Search Accuracy: 0.9445
     INFO    Best parameters: {
       "clf__max_depth": 64,
-      "clf__n_estimators": 500,
+      "clf__n_estimators": 100,
       "clf__n_jobs": -1
     }
 
     INFO    Training an forest classifier.
-    INFO    Training time: 64.66s
+    INFO    Training time: 13.31s
     INFO    Metrics computed on the test set
                   precision    recall  f1-score   support
 
-              0       0.98      0.99      0.98       985
-              1       0.98      0.99      0.99      1110
-              2       0.97      0.97      0.97      1004
-              3       0.96      0.94      0.95      1000
-              4       0.97      0.97      0.97       976
-              5       0.97      0.96      0.97       897
-              6       0.98      0.98      0.98       969
-              7       0.97      0.97      0.97      1062
-              8       0.96      0.95      0.95       995
-              9       0.95      0.95      0.95      1002
+               0       0.98      0.99      0.99       985
+               1       0.98      0.99      0.99      1110
+               2       0.96      0.97      0.96      1004
+               3       0.96      0.94      0.95      1000
+               4       0.96      0.97      0.97       976
+               5       0.97      0.96      0.96       897
+               6       0.98      0.98      0.98       969
+               7       0.97      0.97      0.97      1062
+               8       0.95      0.95      0.95       995
+               9       0.95      0.95      0.95      1002
 
         accuracy                           0.97     10000
-      macro avg       0.97      0.97      0.97     10000
+       macro avg       0.97      0.97      0.97     10000
     weighted avg       0.97      0.97      0.97     10000
 
     Confusion matrix:
-    [[ 975    1    0    0    3    2    1    0    3    0]
-    [   1 1099    1    1    2    0    1    4    1    0]
-    [   4    2  978    5    2    0    0    4    9    0]
-    [   2    1   17  941    1   12    1   12    7    6]
-    [   0    2    0    0  951    0    3    2    2   16]
-    [   5    0    3    8    0  863    6    0    6    6]
-    [   4    0    1    0    1    6  953    0    4    0]
-    [   0    5    5    2    7    0    0 1027    3   13]
-    [   2    6    5   13    5    2    6    1  945   10]
-    [   5    1    1   13   13    1    0    8    7  953]]
+    [[ 974    1    0    0    3    1    2    0    3    1]
+     [   1 1098    2    0    2    0    2    4    1    0]
+     [   5    1  973    3    3    0    0    5   14    0]
+     [   1    1   17  943    0   10    0   12   10    6]
+     [   0    4    0    0  947    0    4    1    2   18]
+     [   5    2    4    8    0  858    8    0    6    6]
+     [   1    0    0    0    2    9  952    0    5    0]
+     [   0    5    8    1    9    0    0 1025    3   11]
+     [   1    5    6    8    5    2    6    2  950   10]
+     [   4    1    3   16   13    2    0    8    4  951]]
 
-
-    $ python3 -m train -v -m -V -g -M extra
+    $ python3 -m train -v -m -g -M extra
     INFO    Loading dataset from data.h5
     INFO    Performing grid search.
-    Fitting 5 folds for each of 9 candidates, totalling 45 fits
-    INFO    Search time: 184.75s
-    INFO    Search Accuracy: 0.952
+    Fitting 5 folds for each of 6 candidates, totalling 30 fits
+    INFO    Search time: 46.13s
+    INFO    Search Accuracy: 0.9484999999999999
     INFO    Best parameters: {
-      "clf__max_depth": 64,
-      "clf__n_estimators": 500,
+      "clf__max_depth": 16,
+      "clf__n_estimators": 100,
       "clf__n_jobs": -1
     }
 
     INFO    Training an extra classifier.
-    INFO    Training time: 78.68s
+    INFO    Training time: 13.89s
     INFO    Metrics computed on the test set
                   precision    recall  f1-score   support
 
-              0       0.98      0.99      0.99       985
-              1       0.99      0.99      0.99      1110
-              2       0.97      0.97      0.97      1004
-              3       0.97      0.94      0.96      1000
-              4       0.97      0.97      0.97       976
-              5       0.98      0.97      0.97       897
-              6       0.99      0.99      0.99       969
-              7       0.97      0.97      0.97      1062
-              8       0.96      0.97      0.96       995
-              9       0.95      0.95      0.95      1002
+               0       0.97      0.99      0.98       980
+               1       0.98      0.99      0.98      1135
+               2       0.96      0.96      0.96      1032
+               3       0.96      0.96      0.96      1010
+               4       0.97      0.96      0.97       982
+               5       0.97      0.96      0.96       892
+               6       0.97      0.98      0.97       958
+               7       0.97      0.95      0.96      1028
+               8       0.97      0.95      0.96       974
+               9       0.94      0.95      0.94      1009
 
         accuracy                           0.97     10000
-      macro avg       0.97      0.97      0.97     10000
+       macro avg       0.97      0.97      0.97     10000
     weighted avg       0.97      0.97      0.97     10000
 
     Confusion matrix:
-    [[ 974    1    0    0    3    3    1    0    3    0]
-    [   1 1099    2    1    1    0    1    4    1    0]
-    [   3    3  976    5    2    0    0    4   11    0]
-    [   1    1   17  945    1   11    0   12    9    3]
-    [   0    2    0    0  951    0    3    2    1   17]
-    [   5    0    2    4    1  869    5    0    6    5]
-    [   2    0    0    0    1    5  957    0    4    0]
-    [   1    5    4    0    5    0    0 1030    3   14]
-    [   1    3    2   10    4    0    3    1  962    9]
-    [   3    1    2   13   13    1    0   10    5  954]]
+    [[ 969    1    0    0    0    2    4    1    3    0]
+     [   0 1123    1    5    0    1    3    0    1    1]
+     [   7    1  995    4    4    0    5   10    6    0]
+     [   0    0   10  968    0   13    0   11    5    3]
+     [   1    0    2    0  945    0    6    0    2   26]
+     [   3    3    0   13    1  857    7    1    5    2]
+     [   5    3    0    1    3    4  939    0    3    0]
+     [   2    8   20    2    1    0    0  976    2   17]
+     [   4    0    5    5    7    7    4    5  927   10]
+     [   6    7    1   11   15    3    1    5    6  954]]
 
 
+    $ python3 -m train -v -m -g -M sgd
+    INFO    Loading dataset from data.h5
+    INFO    Performing grid search.
+    Fitting 5 folds for each of 12 candidates, totalling 60 fits
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    /home/giacomo/.local/lib/python3.8/site-packages/sklearn/linear_model/_stochastic_gradient.py:574: ConvergenceWarning: Maximum number of iteration reached before convergence. Consider increasing max_iter to improve the fit.
+      warnings.warn("Maximum number of iteration reached before "
+    INFO    Search time: 938.60s
+    INFO    Search Accuracy: 0.8974
+    INFO    Best parameters: {
+      "clf__alpha": 0.0001,
+      "clf__loss": "hinge",
+      "clf__n_jobs": -1,
+      "clf__penalty": "l2"
+    }
+
+    INFO    Training an sgd classifier.
+    INFO    Training time: 122.90s
+    INFO    Metrics computed on the test set
+                  precision    recall  f1-score   support
+
+              0       0.96      0.96      0.96       980
+              1       0.98      0.95      0.97      1135
+              2       0.94      0.87      0.90      1032
+              3       0.92      0.88      0.90      1010
+              4       0.94      0.90      0.92       982
+              5       0.90      0.82      0.86       892
+              6       0.93      0.93      0.93       958
+              7       0.95      0.91      0.93      1028
+              8       0.66      0.93      0.77       974
+              9       0.92      0.86      0.89      1009
+
+        accuracy                           0.90     10000
+      macro avg       0.91      0.90      0.90     10000
+    weighted avg       0.91      0.90      0.90     10000
+
+    Confusion matrix:
+    [[ 940    0    0    0    0    9    6    1   24    0]
+    [   0 1083    6    1    0    3    4    0   38    0]
+    [   5    4  898   13    7    1   15    6   80    3]
+    [   4    1   13  884    1   23    3    5   66   10]
+    [   1    0    6    0  882    2    8    3   55   25]
+    [   4    2    0   38    9  734   17    7   71   10]
+    [   8    2    9    0    8   16  888    1   26    0]
+    [   3    2   18    4    6    1    0  932   35   27]
+    [   5    4    4   15    3   23    9    2  904    5]
+    [   5    5    0    8   27    6    0   23   64  871]]
+
+    $ python3 -m train -v -m -M voting
+    INFO    Loading dataset from data.h5
+    INFO    Training an voting classifier.
+    INFO    Training time: 1263.06s
+    INFO    Metrics computed on the test set
+                  precision    recall  f1-score   support
+
+               0       0.97      0.99      0.98       980
+               1       0.98      0.99      0.99      1135
+               2       0.96      0.97      0.97      1032
+               3       0.97      0.97      0.97      1010
+               4       0.97      0.97      0.97       982
+               5       0.98      0.96      0.97       892
+               6       0.98      0.98      0.98       958
+               7       0.97      0.96      0.97      1028
+               8       0.97      0.96      0.97       974
+               9       0.96      0.95      0.95      1009
+
+        accuracy                           0.97     10000
+       macro avg       0.97      0.97      0.97     10000
+    weighted avg       0.97      0.97      0.97     10000
+
+    Confusion matrix:
+    [[ 970    0    1    0    0    2    3    1    3    0]
+     [   0 1126    2    3    0    1    2    0    1    0]
+     [   6    1 1001    4    2    0    3   10    5    0]
+     [   0    0    7  981    0    7    0    8    5    2]
+     [   1    0    2    0  952    0    4    0    3   20]
+     [   3    1    2    9    4  860    6    1    4    2]
+     [   6    3    1    0    3    4  938    0    3    0]
+     [   1    7   18    1    1    0    0  987    1   12]
+     [   4    0    5    6    4    4    3    5  936    7]
+     [   7    7    2   12   14    3    0    5    3  956]]
